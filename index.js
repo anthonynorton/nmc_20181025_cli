@@ -73,17 +73,47 @@ const server = http.createServer((req, res) => {
     buffer += decoder.write(data)
   })
 
+  // req.on('end'... will be called regardless of whether or not there is a
+  // payload.
   req.on('end', () => {
     buffer += decoder.end()
 
-    // Send response
-    res.end('Hello world!\n')
+    // Choose the handler this request should go to. If not found, use not found handler
+    const chosenHandler = router.has(trimmedPath)
+      ? router.get(trimmedPath)
+      : router.get('notFound')
 
-    // Log the buffer to the console
-    console.log(`  ${r}BUFFER`)
-    console.log(`  ${r}• ${y}buffer: ${g}
+    // Construct the data to send to the handler
+    const data = {
+      trimmedPath,
+      queryStringObj,
+      headers,
+      method,
+      payload: buffer,
+    }
+
+    // Router the request to the handler specified in the router
+    chosenHandler(data, (statusCode, payload) => {
+      // Use the status code called back by the handler or default to 200
+      statusCode = typeof statusCode === 'number' ? statusCode : 200
+
+      // Use the payload called back by the handler, or default to an empty object
+      payload = typeof payload === 'object' ? payload : {}
+
+      // Covnert the payload to a string
+      const payloadString = JSON.stringify(payload)
+
+      // Return the response.
+      res.setHeader('Content-Type', 'application/json')
+      res.writeHead(statusCode) //
+      res.end(payloadString)
+
+      // Log the buffer to the console
+      console.log(`  ${r}BUFFER`)
+      console.log(`  ${r}• ${y}buffer: ${g}
 
 ${buffer}`)
+    })
   })
 })
 
@@ -101,3 +131,22 @@ const nowListening = port => {
     `\x1b[32m${'\n\nThe server is now listening on port'} \x1b[31m${port}\x1b[32m${'.'}\x1b[0m\n`
   )
 }
+
+// Define the router handlers
+const handlers = {}
+
+// Sample handler
+handlers.sample = function(data, callback) {
+  // Callback an HTTP status code, and a payload object
+  callback(406, { name: 'sample handler', })
+}
+
+handlers.notFound = function(data, callback) {
+  callback(404)
+}
+
+// Define a request router
+const router = new Map([
+  ['sample', handlers.sample,],
+  ['notFound', handlers.notFound,],
+])
