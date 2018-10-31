@@ -1,3 +1,10 @@
+// Some temporary local variables
+const r = '\x1b[31m'
+const g = '\x1b[32m'
+const y = '\x1b[33m'
+const x = '\x1b[34m'
+const reset = '\x1b[0m'
+
 console.log('index.js')
 const keys = require('../cli_keys')
 
@@ -9,6 +16,7 @@ const keys = require('../cli_keys')
 // Depenedencies
 const http = require('http')
 const url = require('url')
+const StringDecoder = require('string_decoder').StringDecoder
 
 // The server should respond to all requests witha string
 const server = http.createServer((req, res) => {
@@ -33,6 +41,8 @@ const server = http.createServer((req, res) => {
    *  }
    */
 
+  const queryStringObj = parsedURL.query
+
   // Get the path from URL
   const path = parsedURL.pathname
   const trimmedPath = path.replace(/^\/+|\/+$/g, '')
@@ -40,12 +50,41 @@ const server = http.createServer((req, res) => {
   // Get the HTTP method
   const method = req.method.toLowerCase()
 
-  // Send response
+  // Get the headers as an object
+  const headers = req.headers
+
+  // Get the payload, if any
+  const decoder = new StringDecoder('utf-8')
+  let buffer = ''
 
   // Log the requested path to log file and console
-  console.log(` \x1b[33m${'Requested path: '} \x1b[32m${trimmedPath}\x1b[0m\n`)
+  console.log(`${y}Requested path: ${g}${trimmedPath}${y}
+  method: ${g}${method}$`)
+  console.log(`  ${r}QUERIES\n• ${y}KEY: ${g}VALUE`)
+  Object.keys(queryStringObj).forEach(entry => {
+    console.log(`  ${r}• ${y}${entry}: ${g}${queryStringObj[entry]}`)
+  })
+  console.log(`  ${r}HEADERS\n• ${y}KEY: ${g}VALUE`)
+  Object.keys(headers).forEach(entry => {
+    console.log(`  ${r}• ${y}${entry}: ${g}${headers[entry]}`)
+  })
 
-  res.end('Hello world!\n')
+  req.on('data', data => {
+    buffer += decoder.write(data)
+  })
+
+  req.on('end', () => {
+    buffer += decoder.end()
+
+    // Send response
+    res.end('Hello world!\n')
+
+    // Log the buffer to the console
+    console.log(`  ${r}BUFFER`)
+    console.log(`  ${r}• ${y}buffer: ${g}
+
+${buffer}`)
+  })
 })
 
 // Start the server, and have it listen on port keys.PORT.
