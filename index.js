@@ -6,17 +6,17 @@ const x = '\x1b[34m'
 const reset = '\x1b[0m'
 
 console.log('index.js')
-const keys = require('../cli_keys')
 
 /*
-* Primary file for the API
-*
-*/
+ * Primary file for the API
+ *
+ */
 
 // Depenedencies
 const http = require('http')
 const url = require('url')
 const StringDecoder = require('string_decoder').StringDecoder
+const config = require('./config')
 
 // The server should respond to all requests witha string
 const server = http.createServer((req, res) => {
@@ -117,13 +117,18 @@ ${buffer}`)
   })
 })
 
-// Start the server, and have it listen on port keys.PORT.
-server.listen(keys.PORT, () => {
-  nowListening(keys.PORT)
+// Start the server.
+
+console.log(`config.httpPort\x1b[33m ${config.httpPort}\x1b[0m`)
+
+server.listen(config.httpPort, () => {
+  console.log(`config.httpPort\x1b[33m ${config.httpPort}\x1b[0m`)
+  nowListening(config.httpPort)
 })
 
 // Local function: pretty print server start & port.
 const nowListening = port => {
+  console.log(`port: \x1b[33m${port}\x1b[0m`)
   // Make entry in persistent log file when port started, and on what port.
 
   // Log info to console.
