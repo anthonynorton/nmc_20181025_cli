@@ -14,12 +14,43 @@ console.log('index.js')
 
 // Depenedencies
 const http = require('http')
+const https = require('https')
 const url = require('url')
 const StringDecoder = require('string_decoder').StringDecoder
 const config = require('./config')
+const fs = require('fs')
 
 // The server should respond to all requests witha string
-const server = http.createServer((req, res) => {
+const httpServer = http.createServer((req, res) => {
+  unifiedServer(req, res)
+})
+
+// Start the HTTP server.
+httpServer.listen(config.httpPort, () => {
+  console.log(`config.httpPort\x1b[33m ${config.httpPort}\x1b[0m`)
+  nowListening(config.httpPort)
+})
+
+const httpsServerOptions = {
+  key: fs.readFileSync('./https/key.pem'),
+  cert: fs.readFileSync('./https/cert.pem'),
+}
+
+const httpsServer = https.createServer(httpsServerOptions, function httpsServer(
+  req,
+  res
+) {
+  unifiedServer(req, res)
+})
+
+// Start the HTTPS server.
+httpsServer.listen(config.httpsPort, () => {
+  console.log(`config.httpPort\x1b[33m ${config.httpsPort}\x1b[0m`)
+  nowListening(config.httpsPort)
+})
+
+// All the server logic for both the HTTP and HTTPS servers
+const unifiedServer = function unifiedServer(req, res) {
   // Get the URL and parse it
   const parsedURL = url.parse(req.url, true)
   /**
@@ -115,16 +146,7 @@ const server = http.createServer((req, res) => {
 ${buffer}`)
     })
   })
-})
-
-// Start the server.
-
-console.log(`config.httpPort\x1b[33m ${config.httpPort}\x1b[0m`)
-
-server.listen(config.httpPort, () => {
-  console.log(`config.httpPort\x1b[33m ${config.httpPort}\x1b[0m`)
-  nowListening(config.httpPort)
-})
+}
 
 // Local function: pretty print server start & port.
 const nowListening = port => {
