@@ -20,6 +20,8 @@ const https = require('https')
 const StringDecoder = require('string_decoder').StringDecoder
 const url = require('url')
 
+const handlers = require('./lib/handlers')
+
 // The server should respond to all requests witha string
 const httpServer = http.createServer((req, res) => {
   unifiedServer(req, res)
@@ -159,24 +161,6 @@ const nowListening = port => {
   console.log(
     `\x1b[32m${'\n\nThe server is now listening on port'} \x1b[31m${port}\x1b[32m${'.'}\x1b[0m\n`
   )
-}
-
-// Define the routes
-const handlers = {}
-
-// Sample handler
-handlers.sample = function(data, callback) {
-  // Callback an HTTP status code, and a payload object
-  callback(406, { name: 'sample handler', })
-}
-
-// Ping handler
-handlers.ping = function(data, callback) {
-  callback(200)
-}
-
-handlers.notFound = function(data, callback) {
-  callback(404)
 }
 
 // Define available routes
