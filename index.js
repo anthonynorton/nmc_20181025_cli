@@ -45,7 +45,7 @@ const httpsServer = https.createServer(httpsServerOptions, function httpsServer(
 
 // Start the HTTPS server.
 httpsServer.listen(config.httpsPort, () => {
-  console.log(`config.httpPort\x1b[33m ${config.httpsPort}\x1b[0m`)
+  console.log(`config.httpsPort\x1b[33m ${config.httpsPort}\x1b[0m`)
   nowListening(config.httpsPort)
 })
 
@@ -144,6 +144,8 @@ const unifiedServer = function unifiedServer(req, res) {
       console.log(`  ${r}• ${y}buffer: ${g}
 
 ${buffer}`)
+
+      console.log('Returning this response: ', statusCode, payloadString)
     })
   })
 }
@@ -168,6 +170,11 @@ handlers.sample = function(data, callback) {
   callback(406, { name: 'sample handler', })
 }
 
+// Ping handler
+handlers.ping = function(data, callback) {
+  callback(200)
+}
+
 handlers.notFound = function(data, callback) {
   callback(404)
 }
@@ -175,5 +182,6 @@ handlers.notFound = function(data, callback) {
 // Define a request router
 const router = new Map([
   ['sample', handlers.sample,],
+  ['ping', handlers.ping,],
   ['notFound', handlers.notFound,],
 ])
