@@ -20,8 +20,6 @@ const https = require('https')
 const StringDecoder = require('string_decoder').StringDecoder
 const url = require('url')
 
-const _data = require('./lib/data')
-
 // The server should respond to all requests witha string
 const httpServer = http.createServer((req, res) => {
   unifiedServer(req, res)
