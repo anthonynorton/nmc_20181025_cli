@@ -13,12 +13,14 @@ console.log('index.js')
  */
 
 // Depenedencies
-const http = require('http')
-const https = require('https')
-const url = require('url')
-const StringDecoder = require('string_decoder').StringDecoder
 const config = require('./config')
 const fs = require('fs')
+const http = require('http')
+const https = require('https')
+const StringDecoder = require('string_decoder').StringDecoder
+const url = require('url')
+
+const _data = require('./lib/data')
 
 // The server should respond to all requests witha string
 const httpServer = http.createServer((req, res) => {
@@ -110,9 +112,9 @@ const unifiedServer = function unifiedServer(req, res) {
     buffer += decoder.end()
 
     // Choose the handler this request should go to. If not found, use not found handler
-    const chosenHandler = router.has(trimmedPath)
-      ? router.get(trimmedPath)
-      : router.get('notFound')
+    const chosenHandler = routes.has(trimmedPath)
+      ? routes.get(trimmedPath)
+      : routes.get('notFound')
 
     // Construct the data to send to the handler
     const data = {
@@ -123,7 +125,7 @@ const unifiedServer = function unifiedServer(req, res) {
       payload: buffer,
     }
 
-    // Router the request to the handler specified in the router
+    // Route the request to the handler specified in the routes
     chosenHandler(data, (statusCode, payload) => {
       // Use the status code called back by the handler or default to 200
       statusCode = typeof statusCode === 'number' ? statusCode : 200
@@ -161,7 +163,7 @@ const nowListening = port => {
   )
 }
 
-// Define the router handlers
+// Define the routes
 const handlers = {}
 
 // Sample handler
@@ -179,8 +181,8 @@ handlers.notFound = function(data, callback) {
   callback(404)
 }
 
-// Define a request router
-const router = new Map([
+// Define available routes
+const routes = new Map([
   ['sample', handlers.sample,],
   ['ping', handlers.ping,],
   ['notFound', handlers.notFound,],
